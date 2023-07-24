@@ -4,9 +4,7 @@ import tradingview_ta, time, json
 from binance.client import Client
 from binance.enums import *
 nBela = ""
-with open("datosorden.json", "r") as archivo:
-    datosorden = json.load(archivo)
-archivo.close()
+
 #mambra
 key = "b1m4F6maj9cChCOUEo5gkcGnkgfC9gSjeivju245a51t71GZVYjza0eZHJEd8tsa"
 priv = "AbQ8BWY2WbQXkAJt63binouleSPZFKjQXcvKrBlbThArKq55O2vY1jhhjbTXvLbI"
