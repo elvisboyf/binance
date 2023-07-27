@@ -73,8 +73,12 @@ if public_ip:
                         
                         if entra == "BUY" and orden != entra:
                             orden = entra
-                            orders = client.futures_position_information(symbol=moneda[:moneda.index("USDT")+4].upper())
-                            
+                            orders = ""
+                            while True:
+                                if orders != "":
+                                    orders = client.futures_position_information(symbol=moneda[:moneda.index("USDT")+4].upper())
+                                    break
+                                
                             #aqui vamos con el precio al que debe estar como minimo
                             precioC = float(orders[1]["entryPrice"])-(float(orders[1]["entryPrice"])*0.004)
                             cantidad = round(usdt / float(orders[0]["markPrice"]),0)
@@ -109,7 +113,7 @@ if public_ip:
                             
                             
                             
-                    if float(indicadores['EMA50']) < float(indicadores['EMA100']) and float(indicadores['EMA50']) > float(pClose):
+                    if float(indicadores['EMA50']) > float(indicadores['EMA100']) and float(indicadores['EMA50']) > float(pClose):
                         print("tendecia bajista")
                         try:
                             entra = señal['RECOMMENDATION'].index("SELL")
@@ -119,7 +123,11 @@ if public_ip:
                             orden = entra
                         
                         if entra == "SELL" and orden != entra:
-                            orders = client.futures_position_information(symbol=moneda[:moneda.index("USDT")+4].upper())
+                            orders = ""
+                            while True:
+                                if orders != "":
+                                    orders = client.futures_position_information(symbol=moneda[:moneda.index("USDT")+4].upper())
+                                    break
                             orden = entra
                             #Aqui va el precio minimo al que debe estar
                             precioV = float(orders[2]["entryPrice"])+(float(orders[2]["entryPrice"])*0.004)
