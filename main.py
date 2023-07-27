@@ -62,7 +62,7 @@ if public_ip:
                 if pOpen != nBela:
                     nBela = pOpen
                     print("Mi señal es: "+señal['RECOMMENDATION'])
-                    if float(indicadores['EMA100']) < float(pClose):
+                    if float(indicadores['EMA50']) > float(indicadores['EMA100']) and float(indicadores['EMA50']) < float(pClose):
                         print("tendencia alcista")
                         try:
                             entra = señal['RECOMMENDATION'].index("BUY")
@@ -109,7 +109,7 @@ if public_ip:
                             
                             
                             
-                    if float(indicadores['EMA100']) > float(pClose):
+                    if float(indicadores['EMA50']) < float(indicadores['EMA100']) and float(indicadores['EMA50']) > float(pClose):
                         print("tendecia bajista")
                         try:
                             entra = señal['RECOMMENDATION'].index("SELL")
