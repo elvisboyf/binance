@@ -114,7 +114,7 @@ if configuracion["bot"] == "On":
                                             print(e)
                                             time.sleep(10)
                                     # aqui vamos con el precio al que debe estar como mínimo
-                                    precioC = float(orders[1]["entryPrice"]) - (float(orders[1]["entryPrice"]) * 0.005)
+                                    precioC = float(orders[1]["entryPrice"]) - (float(orders[1]["entryPrice"]) * 0.01)
                                     cantidad = round(float(datosmontos[moneda][0]) / float(orders[0]["markPrice"]), datosmonedas[moneda][1])
                                     if precioC >= float(orders[1]["markPrice"]) or precioC == 0.0:
                                         print("abrir Compra")
@@ -140,12 +140,12 @@ if configuracion["bot"] == "On":
                                                             type=ORDER_TYPE_LIMIT,
                                                             timeinforce='GTC',
                                                             quantity=abs(float(orders[1]["positionAmt"])),
-                                                            price=round(float(orders[1]["entryPrice"]) + (float(orders[1]["entryPrice"]) * 0.003), datosmonedas[moneda][0])
+                                                            price=round(float(orders[1]["entryPrice"]) + (float(orders[1]["entryPrice"]) * 0.005), datosmonedas[moneda][0])
                                                         )
                                                         break
                                                 break
 
-                    if float(indicadores['EMA100']) > float(pClose):
+                    elif float(indicadores['EMA100']) > float(pClose):
                         print("tendencia bajista")
                         try:
                             entra = señal['RECOMMENDATION'].index("SELL")
@@ -171,7 +171,7 @@ if configuracion["bot"] == "On":
 
                                     lOrden[moneda] = entra
                                     # Aquí va el precio mínimo al que debe estar
-                                    precioV = float(orders[2]["entryPrice"]) + (float(orders[2]["entryPrice"]) * 0.005)
+                                    precioV = float(orders[2]["entryPrice"]) + (float(orders[2]["entryPrice"]) * 0.01)
                                     cantidad = round(float(datosmontos[moneda][1]) / float(orders[0]["markPrice"]), datosmonedas[moneda][1])
                                     if precioV <= float(orders[2]["markPrice"]) or precioV == 0.0:
                                         order_short = ""
@@ -198,7 +198,7 @@ if configuracion["bot"] == "On":
                                                             type=ORDER_TYPE_LIMIT,
                                                             timeinforce='GTC',
                                                             quantity=abs(float(orders[2]["positionAmt"])),
-                                                            price=round(float(orders[2]["entryPrice"]) - (float(orders[2]["entryPrice"]) * 0.003), datosmonedas[moneda][0])
+                                                            price=round(float(orders[2]["entryPrice"]) - (float(orders[2]["entryPrice"]) * 0.005), datosmonedas[moneda][0])
                                                         )
                                                         break
                                                 break
