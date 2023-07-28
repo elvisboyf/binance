@@ -121,28 +121,28 @@ if configuracion["bot"] == "On":
                                         print("abrir Compra")
                                         print(pClose)
                                         order_long =""
-                                        # order_long = client.futures_create_order(
-                                        #     symbol=moneda[:moneda.index("USDT")+4].upper(),
-                                        #     side='BUY',
-                                        #     positionSide='LONG',
-                                        #     type=ORDER_TYPE_MARKET,
-                                        #     quantity=cantidad
-                                        # )
+                                         order_long = client.futures_create_order(
+                                             symbol=moneda[:moneda.index("USDT")+4].upper(),
+                                             side='BUY',
+                                             positionSide='LONG',
+                                             type=ORDER_TYPE_MARKET,
+                                             quantity=cantidad
+                                         )
                                         while True:
                                             if order_long != "":
                                                 orders =""
                                                 orders = client.futures_position_information(symbol=moneda[:moneda.index("USDT")+4].upper())
                                                 while True:
                                                     if orders !="":
-                                                        # close_long = client.futures_create_order(
-                                                        #     symbol=moneda[:moneda.index("USDT")+4].upper(),
-                                                        #     side='SELL',
-                                                        #     positionSide='LONG',
-                                                        #     type=ORDER_TYPE_LIMIT,
-                                                        #     timeinforce='GTC',
-                                                        #     quantity=abs(float(orders[1]["positionAmt"])),
-                                                        #     price=round(float(orders[1]["entryPrice"])+(float(orders[1]["entryPrice"])*0.003),decimalprecio)
-                                                        # )
+                                                         close_long = client.futures_create_order(
+                                                             symbol=moneda[:moneda.index("USDT")+4].upper(),
+                                                             side='SELL',
+                                                             positionSide='LONG',
+                                                             type=ORDER_TYPE_LIMIT,
+                                                             timeinforce='GTC',
+                                                             quantity=abs(float(orders[1]["positionAmt"])),
+                                                             price=round(float(orders[1]["entryPrice"])+(float(orders[1]["entryPrice"])*0.003),decimalprecio)
+                                                         )
                                                         break
                                                 break
                             
@@ -180,13 +180,13 @@ if configuracion["bot"] == "On":
                                     cantidad = round(float(atosmontos[moneda][1]) / float(orders[0]["markPrice"]),decimalmoneda)
                                     if  precioV <= float(orders[2]["markPrice"]) or precioV == 0.0 :
                                         order_short=""
-                                        # order_short = client.futures_create_order(
-                                        #     symbol=moneda[:moneda.index("USDT")+4].upper(),
-                                        #     side='SELL',
-                                        #     positionSide='SHORT',
-                                        #     type=ORDER_TYPE_MARKET,
-                                        #     quantity=cantidad
-                                        # )
+                                         order_short = client.futures_create_order(
+                                             symbol=moneda[:moneda.index("USDT")+4].upper(),
+                                             side='SELL',
+                                             positionSide='SHORT',
+                                             type=ORDER_TYPE_MARKET,
+                                             quantity=cantidad
+                                         )
                                         print("abri short:")
                                         print(pClose)
                                         while True:
@@ -196,15 +196,15 @@ if configuracion["bot"] == "On":
                                                 
                                                 while True:
                                                     if orders != "":
-                                                        # close_short = client.futures_create_order(
-                                                        #       symbol=moneda[:moneda.index("USDT")+4].upper(),
-                                                        #       side='BUY',
-                                                        #       positionSide='SHORT',
-                                                        #       type=ORDER_TYPE_LIMIT,
-                                                        #       timeinforce='GTC',
-                                                        #       quantity=abs(float(orders[2]["positionAmt"])),
-                                                        #       price=round(float(orders[2]["entryPrice"])-(float(orders[2]["entryPrice"])*0.005),decimalprecio)
-                                                        #   )
+                                                         close_short = client.futures_create_order(
+                                                               symbol=moneda[:moneda.index("USDT")+4].upper(),
+                                                               side='BUY',
+                                                               positionSide='SHORT',
+                                                               type=ORDER_TYPE_LIMIT,
+                                                               timeinforce='GTC',
+                                                               quantity=abs(float(orders[2]["positionAmt"])),
+                                                               price=round(float(orders[2]["entryPrice"])-(float(orders[2]["entryPrice"])*0.005),decimalprecio)
+                                                           )
                                                         break
                                                 break
             
