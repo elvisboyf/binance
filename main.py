@@ -8,7 +8,7 @@ with open("datosmonedas.json", "r") as archivo:
 archivo.close()
 
 #LISTA DE URLs
-urlmonto = "https://dl.dropboxusercontent.com/s/x34e43ep4i25ye9/montos.js"
+urlmontos = "https://dl.dropboxusercontent.com/s/x34e43ep4i25ye9/montos.js"
 urlmonedas = "https://dl.dropboxusercontent.com/s/j3vhsfkwqwm2h7t/monedas.js"
 urlconfig = "https://dl.dropboxusercontent.com/s/j3jmgb3tk01mvsl/config.js"
 urlapikey = "https://dl.dropboxusercontent.com/s/7yzcbq4khj4uesf/apikey.js"
@@ -31,8 +31,8 @@ if configuracion["bot"] == "On":
     cciclos = 0
     while True:
         try:
-            connmontos = requests.get(urlmonto).text
-            datosmontos = json.loads(connconfig)
+            connmontos = requests.get(urlmontos).text
+            datosmontos = json.loads(connmontos)
             break
         except Exception:
             print("Error urlmontos")
@@ -45,9 +45,6 @@ if configuracion["bot"] == "On":
         except Exception:
             print("Error urlmonedas")
             time.sleep(5)
-    for moneda in listamondedas:
-        lBelas[moneda]=0
-        lOrden[moneda]=0
     while True:
         try:
             connapikey = requests.get(urlapikey).text
@@ -56,6 +53,10 @@ if configuracion["bot"] == "On":
         except Exception:
             print("Error urlapikey")
             time.sleep(5)
+    for moneda in listamondedas:
+        lBelas[moneda]=0
+        lOrden[moneda]=0
+    
     usuarios = list(listaapikey.keys())
     
     while True:
@@ -223,22 +224,28 @@ if configuracion["bot"] == "On":
                 cciclos = 0
                 while True:
                     try:
-                        connmontos = requests.get(urlmonto).text
+                        connmontos = requests.get(urlmontos).text
+                        datosmontos = json.loads(connmontos)
                         break
                     except Exception:
                         print("Error urlmontos")
+                        time.sleep(5)
                 while True:
                     try:
                         connmonedas = requests.get(urlmonedas).text
+                        listamondedas = json.loads(connmonedas)
                         break
                     except Exception:
                         print("Error urlmonedas")
+                        time.sleep(5)
                 while True:
                     try:
                         connapikey = requests.get(urlapikey).text
+                        listaapikey = json.loads(connapikey)
                         break
                     except Exception:
                         print("Error urlapikey")
+                        time.sleep(5)
                 
                 for moneda in listamondedas:
                     lBelas[moneda]=0
@@ -260,4 +267,3 @@ if configuracion["bot"] == "On":
 else:
     print("Estoy Apagado")
     time.sleep(configuracion["wait"])
-
