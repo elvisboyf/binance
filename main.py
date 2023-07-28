@@ -121,7 +121,7 @@ if configuracion["bot"] == "On":
                                         print("abrir Compra")
                                         print(pClose)
                                         order_long =""
-                                         order_long = client.futures_create_order(
+                                        order_long = client.futures_create_order(
                                              symbol=moneda[:moneda.index("USDT")+4].upper(),
                                              side='BUY',
                                              positionSide='LONG',
