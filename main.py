@@ -19,7 +19,7 @@ def get_public_ip():
 
 public_ip = get_public_ip()
 if public_ip:
-    if public_ip == buenaIP:
+    if public_ip == buenaIP or 1==1:
         while True:
             
             try:
