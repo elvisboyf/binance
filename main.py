@@ -1,5 +1,5 @@
 from tradingview_ta import *
-import tradingview_ta, time, json
+import tradingview_ta, time, json, requests
 #import matplotlib.pyplot as plt
 from binance.client import Client
 from binance.enums import *
