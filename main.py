@@ -143,7 +143,7 @@ if configuracion["bot"] == "On":
                                                              quantity=abs(float(orders[1]["positionAmt"])),
                                                              price=round(float(orders[1]["entryPrice"])+(float(orders[1]["entryPrice"])*0.003),datosmonedas[moneda][0])
                                                          )
-                                                        break
+                                                	break
                                                 break
                             
                             
