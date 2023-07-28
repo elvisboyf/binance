@@ -202,6 +202,7 @@ if configuracion["bot"] == "On":
                                                         )
                                                         break
                                                 break
+                time.sleep(2)
         else:
             while True:
                 try:
