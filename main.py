@@ -6,7 +6,6 @@ from binance.enums import *
 
 print("me estoy ejecutando")
 buenaIP = "54.254.162.138"
-import requests
 
 def get_public_ip():
     try:
