@@ -116,7 +116,7 @@ if configuracion["bot"] == "On":
                                             time.sleep(10)
                                     #aqui vamos con el precio al que debe estar como minimo
                                     precioC = float(orders[1]["entryPrice"])-(float(orders[1]["entryPrice"])*0.007)
-                                    cantidad = round(datosmontos[moneda][0] / float(orders[0]["markPrice"]),decimalmoneda)
+                                    cantidad = round(float(datosmontos[moneda][0]) / float(orders[0]["markPrice"]),decimalmoneda)
                                     if  precioC >= float(orders[1]["markPrice"]) or precioC == 0.0:
                                         print("abrir Compra")
                                         print(pClose)
@@ -177,7 +177,7 @@ if configuracion["bot"] == "On":
                                     lOrden[moneda] = entra
                                     #Aqui va el precio minimo al que debe estar
                                     precioV = float(orders[2]["entryPrice"])+(float(orders[2]["entryPrice"])*0.007)
-                                    cantidad = round(datosmontos[moneda][1] / float(orders[0]["markPrice"]),decimalmoneda)
+                                    cantidad = round(float()atosmontos[moneda][1]) / float(orders[0]["markPrice"]),decimalmoneda)
                                     if  precioV <= float(orders[2]["markPrice"]) or precioV == 0.0 :
                                         order_short=""
                                         # order_short = client.futures_create_order(
