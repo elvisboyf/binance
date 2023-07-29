@@ -65,14 +65,24 @@ if configuracion["bot"] == "On":
         if ciclos > cciclos:
             print("estoy corriendo ciclo " + str(cciclos))
             cciclos += 1
+            analiza = ""
             for moneda in listamondedas:
                 # TRAER LOS DATOS DE TRANDIGVIEW
-                analiza = TA_Handler(
-                    symbol=moneda + ".P",
-                    screener="crypto",
-                    exchange="BINANCE",
-                    interval=Interval.INTERVAL_1_MINUTE
-                )
+                while True:
+                    
+                    try:
+                        analiza = TA_Handler(
+                            symbol=moneda + ".P",
+                            screener="crypto",
+                            exchange="BINANCE",
+                            interval=Interval.INTERVAL_1_MINUTE
+                        )
+                    except Exception:
+                        pass
+                    if analiza != "":
+                        break
+                        
+                        
                 # LOS DATOS DE LOS INDICADORES
                 indicadores = analiza.get_analysis().indicators
                 señal = analiza.get_analysis().summary
