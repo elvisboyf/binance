@@ -1,271 +1,220 @@
 from tradingview_ta import *
 import tradingview_ta
 import time
-import json
-import requests
 from binance.client import Client
 from binance.enums import *
+import psycopg2 as pg
 
-with open("datosmonedas.json", "r") as archivo:
-    datosmonedas = json.load(archivo)
-    archivo.close()
-
-# LISTA DE URLs
-urlmontos = "https://dl.dropboxusercontent.com/s/x34e43ep4i25ye9/montos.js"
-urlmonedas = "https://dl.dropboxusercontent.com/s/j3vhsfkwqwm2h7t/monedas.js"
-urlconfig = "https://dl.dropboxusercontent.com/s/j3jmgb3tk01mvsl/config.js"
-urlapikey = "https://dl.dropboxusercontent.com/s/7yzcbq4khj4uesf/apikey.js"
-
-while True:
-    try:
-        connconfig = requests.get(urlconfig).text
-        break
-    except Exception as e:
-        print("Error de conn urlconfig")
-        time.sleep(5)
-
-configuracion = json.loads(connconfig)
 lBelas = {}
 lOrden = {}
-if configuracion["bot"] == "On":
-    print("ENCENDIENDO...")
-    ciclos = configuracion["ciclos"]
-    cciclos = 0
+
+def conectar():
     while True:
         try:
-            connmontos = requests.get(urlmontos).text
-            datosmontos = json.loads(connmontos)
+            print("conectando DB")
+            conecxion = pg.connect(
+                host="postgres://root:FxoDBQeYSb82YvlJS538k883NlsbZEiW@dpg-cj4dputgkuvsl08la0s0-a/creativedb",
+                user="root",
+                password = "FxoDBQeYSb82YvlJS538k883NlsbZEiW",
+                database = "creativedb",
+                port = "5432")
             break
         except Exception:
-            print("Error urlmontos")
-            time.sleep(5)
-    while True:
-        try:
-            connmonedas = requests.get(urlmonedas).text
-            listamondedas = json.loads(connmonedas)
-            break
-        except Exception:
-            print("Error urlmonedas")
-            time.sleep(5)
-    while True:
-        try:
-            connapikey = requests.get(urlapikey).text
-            listaapikey = json.loads(connapikey)
-            break
-        except Exception:
-            print("Error urlapikey")
-            time.sleep(5)
-    for moneda in listamondedas:
-        lBelas[moneda] = 0
-        lOrden[moneda] = 0
+            print("error en conection")
+    return conecxion
 
-    usuarios = list(listaapikey.keys())
-
-    while True:
-        if ciclos > cciclos:
-            print("estoy corriendo ciclo " + str(cciclos))
-            cciclos += 1
-            analiza = ""
-            for moneda in listamondedas:
-                # TRAER LOS DATOS DE TRANDIGVIEW
-                while True:
-                    
-                    try:
-                        analiza = TA_Handler(
-                            symbol=moneda + ".P",
-                            screener="crypto",
-                            exchange="BINANCE",
-                            interval=Interval.INTERVAL_1_MINUTE
-                        )
-                    except Exception:
-                        pass
-                    if analiza != "":
-                        break
-                        
-                        
-                # LOS DATOS DE LOS INDICADORES
-                indicadores = analiza.get_analysis().indicators
-                señal = analiza.get_analysis().summary
-                ociladores = analiza.get_analysis().oscillators
-                medias = analiza.get_analysis().moving_averages
-                pOpen = analiza.get_analysis().indicators['open']
-                pHigh = analiza.get_analysis().indicators['high']
-                pLow = analiza.get_analysis().indicators['low']
-                pClose = analiza.get_analysis().indicators['close']
-
-                nBela = lBelas[moneda]
-
-                print(moneda + ":> " + str(pClose))
-                if pOpen != nBela:
-                    lBelas[moneda] = pOpen
-                    print(moneda + " es: " + señal['RECOMMENDATION'])
-                    if float(indicadores['EMA100']) < float(pClose):
-                        print("tendencia alcista")
-                        try:
-                            entra = señal['RECOMMENDATION'].index("BUY")
-                            entra = "BUY"
-                        except Exception:
-                            entra = señal['RECOMMENDATION']
-                            lOrden[moneda] = entra
-
-                        if entra == "BUY" and lOrden[moneda] != entra:
-                            for usuario in usuarios:
-                                if listaapikey[usuario][2] == 1:
-                                    key = listaapikey[usuario][0]
-                                    priv = listaapikey[usuario][1]
-                                    client = Client(key, priv, )
-                                    time.sleep(5)
-                                    lOrden[moneda] = entra
-                                    while True:
-                                        try:
-                                            orders = client.futures_position_information(symbol=moneda[:moneda.index("USDT") + 4].upper())
-                                            break
-                                        except Exception as e:
-                                            print(e)
-                                            time.sleep(10)
-                                    # aqui vamos con el precio al que debe estar como mínimo
-                                    precioC = float(orders[1]["entryPrice"]) - (float(orders[1]["entryPrice"]) * 0.007)
-                                    cantidad = round(float(datosmontos[moneda][0]) / float(orders[0]["markPrice"]), datosmonedas[moneda][1])
-                                    if precioC >= float(orders[1]["markPrice"]) or precioC == 0.0:
-                                        print("abrir Compra")
-                                        print(pClose)
-                                        order_long = ""
-                                        order_long = client.futures_create_order(
-                                            symbol=moneda[:moneda.index("USDT") + 4].upper(),
-                                            side='BUY',
-                                            positionSide='LONG',
-                                            type=ORDER_TYPE_MARKET,
-                                            quantity=cantidad
-                                        )
-                                        while True:
-                                            if order_long != "":
-                                                orders = ""
-                                                orders = client.futures_position_information(symbol=moneda[:moneda.index("USDT") + 4].upper())
-                                                while True:
-                                                    if orders != "":
-                                                        close_long = client.futures_create_order(
-                                                            symbol=moneda[:moneda.index("USDT") + 4].upper(),
-                                                            side='SELL',
-                                                            positionSide='LONG',
-                                                            type=ORDER_TYPE_LIMIT,
-                                                            timeinforce='GTC',
-                                                            quantity=abs(float(orders[1]["positionAmt"])),
-                                                            price=round(float(orders[1]["entryPrice"]) + (float(orders[1]["entryPrice"]) * 0.005), datosmonedas[moneda][0])
-                                                        )
-                                                        break
-                                                break
-
-                    elif float(indicadores['EMA100']) > float(pClose):
-                        print("tendencia bajista")
-                        try:
-                            entra = señal['RECOMMENDATION'].index("SELL")
-                            entra = "SELL"
-                        except Exception:
-                            entra = señal['RECOMMENDATION']
-                            lOrden[moneda] = entra
-
-                        if entra == "SELL" and lOrden[moneda] != entra:
-                            for usuario in usuarios:
-                                if listaapikey[usuario][2] == 1:
-                                    key = listaapikey[usuario][0]
-                                    priv = listaapikey[usuario][1]
-                                    client = Client(key, priv)
-                                    time.sleep(5)
-                                    while True:
-                                        try:
-                                            orders = client.futures_position_information(symbol=moneda[:moneda.index("USDT") + 4].upper())
-                                            break
-                                        except Exception as e:
-                                            print(e)
-                                            time.sleep(10)
-
-                                    lOrden[moneda] = entra
-                                    # Aquí va el precio mínimo al que debe estar
-                                    precioV = float(orders[2]["entryPrice"]) + (float(orders[2]["entryPrice"]) * 0.007)
-                                    cantidad = round(float(datosmontos[moneda][1]) / float(orders[0]["markPrice"]), datosmonedas[moneda][1])
-                                    if precioV <= float(orders[2]["markPrice"]) or precioV == 0.0:
-                                        order_short = ""
-                                        order_short = client.futures_create_order(
-                                            symbol=moneda[:moneda.index("USDT") + 4].upper(),
-                                            side='SELL',
-                                            positionSide='SHORT',
-                                            type=ORDER_TYPE_MARKET,
-                                            quantity=cantidad
-                                        )
-                                        print("abri short:")
-                                        print(pClose)
-                                        while True:
-                                            if order_short != "":
-                                                orders = ""
-                                                orders = client.futures_position_information(symbol=moneda[:moneda.index("USDT") + 4].upper())
-
-                                                while True:
-                                                    if orders != "":
-                                                        close_short = client.futures_create_order(
-                                                            symbol=moneda[:moneda.index("USDT") + 4].upper(),
-                                                            side='BUY',
-                                                            positionSide='SHORT',
-                                                            type=ORDER_TYPE_LIMIT,
-                                                            timeinforce='GTC',
-                                                            quantity=abs(float(orders[2]["positionAmt"])),
-                                                            price=round(float(orders[2]["entryPrice"]) - (float(orders[2]["entryPrice"]) * 0.005), datosmonedas[moneda][0])
-                                                        )
-                                                        break
-                                                break
-                time.sleep(2)
-        else:
+while True:
+    conn = conectar()
+    cursor= conn.cursor()
+    
+    #verifica configuracion
+    cursor.execute("SELECT * FROM public.config")
+    config = cursor.fetchall()
+    
+    #buscar los usuarios activo
+    cursor.execute("SELECT * FROM public.tokens WHERE actived = 1")
+    tokens = cursor.fetchall()
+    
+    #LISTA DE BARIABLES QUE SE DEBEN REINICIAR CADA CICLO
+    analiza = ""
+    
+    if config[0][0] =="on" and len(tokens) != 0:
+        #AQUI INICIA EL CODIGO A EJECUTAR
+        for token in tokens:
+            inicio = time.time()
+            moneda = token[1]
             while True:
                 try:
-                    connconfig = requests.get(urlconfig).text
-                    configuracion = json.loads(connconfig)
-                    print("reconectado..")
-                    break
-                except Exception:
-                    print("Error de conn urlconfig")
-
-            if configuracion["bot"] == "Update":
-                print("Actualizando datos")
-                ciclos = configuracion["ciclos"]
-                cciclos = 0
-                while True:
-                    try:
-                        connmontos = requests.get(urlmontos).text
-                        datosmontos = json.loads(connmontos)
+                    analiza = TA_Handler(
+                        symbol=moneda + ".P",
+                        screener="crypto",
+                        exchange="BINANCE",
+                        interval=Interval.INTERVAL_1_MINUTE
+                    )
+                    if analiza != "":
+                        # LOS DATOS DE LOS INDICADORES
+                        indicadores = analiza.get_analysis().indicators
+                        señal = analiza.get_analysis().summary
+                        ociladores = analiza.get_analysis().oscillators
+                        medias = analiza.get_analysis().moving_averages
+                        pOpen = analiza.get_analysis().indicators['open']
+                        pHigh = analiza.get_analysis().indicators['high']
+                        pLow = analiza.get_analysis().indicators['low']
+                        pClose = analiza.get_analysis().indicators['close']
                         break
-                    except Exception:
-                        print("Error urlmontos")
-                        time.sleep(5)
-                while True:
-                    try:
-                        connmonedas = requests.get(urlmonedas).text
-                        listamondedas = json.loads(connmonedas)
-                        break
-                    except Exception:
-                        print("Error urlmonedas")
-                        time.sleep(5)
-                while True:
-                    try:
-                        connapikey = requests.get(urlapikey).text
-                        listaapikey = json.loads(connapikey)
-                        break
-                    except Exception:
-                        print("Error urlapikey")
-                        time.sleep(5)
+                except Exception as e:
+                    print(e)
+                    print("Estoy en un error")
+                    time.sleep(5)
+            
+            
+            try:
+                nBela = lBelas[moneda]
+            except Exception:
+                lOrden[moneda] = 0
+                lBelas[moneda] = 0
+                nBela = 0
 
-                for moneda in listamondedas:
-                    lBelas[moneda] = 0
-                    lOrden[moneda] = 0
-                usuarios = list(listaapikey.keys())
+            print(moneda + ":> " + str(pClose))
+            
+            if pOpen != nBela:
+                lBelas[moneda] = pOpen
+                print(moneda + " es: " + señal['RECOMMENDATION'])
+                if float(indicadores['EMA100']) < float(pClose):
+                    print("tendencia alcista")
+                    try:
+                        entra = señal['RECOMMENDATION'].index("BUY")
+                        entra = "BUY"
+                    except Exception:
+                        entra = señal['RECOMMENDATION']
+                        lOrden[moneda] = entra
 
-            elif configuracion["bot"] == "Stop":
-                print("Me detuve")
-                break
-            elif configuracion["bot"] == "Wait":
-                print("que tiempo quiere que espere")
-                print("esperare " + str(configuracion["wait"]))
-            else:
-                print("continuar igual")
-                cciclos = 0
-else:
-    print("Estoy Apagado")
-    time.sleep(configuracion["wait"])
+                    if entra == "BUY" and lOrden[moneda] != entra:
+                        cursor.execute("SELECT * FROM public.active WHERE token = '"+moneda+"'")
+                        actives = cursor.fetchall()
+                        for active in actives:
+                            if active[2] > 0:
+                                cursor.execute("SELECT * FROM public.users WHERE name = '"+active[1]+"'")
+                                user = cursor.fetchall()
+                                client = Client(user[0][2], user[0][3])
+                                
+                                lOrden[moneda] = entra
+                                while True:
+                                    try:
+                                        orders = client.futures_position_information(symbol=moneda[:moneda.index("USDT") + 4].upper())
+                                        break
+                                    except Exception as e:
+                                        print(e)
+                                        time.sleep(10)
+                                        
+                                # aqui vamos con el precio al que debe estar como mínimo
+                                precioC = float(orders[1]["entryPrice"]) - (float(orders[1]["entryPrice"]) * float(active[4]))
+                                cantidad = round(float(active[2]) / float(orders[0]["markPrice"]), int(token[2]))
+                                if precioC >= float(orders[1]["markPrice"]) or precioC == 0.0:
+                                    print("abrir Compra")
+                                    print(pClose)
+                                    order_long = ""
+                                    order_long = client.futures_create_order(
+                                        symbol=moneda[:moneda.index("USDT") + 4].upper(),
+                                        side='BUY',
+                                        positionSide='LONG',
+                                        type=ORDER_TYPE_MARKET,
+                                        quantity=cantidad
+                                    )
+                                    while True:
+                                        if order_long != "":
+                                            orders = ""
+                                            orders = client.futures_position_information(symbol=moneda[:moneda.index("USDT") + 4].upper())
+                                            while True:
+                                                if orders != "":
+                                                    close_long = client.futures_create_order(
+                                                        symbol=moneda[:moneda.index("USDT") + 4].upper(),
+                                                        side='SELL',
+                                                        positionSide='LONG',
+                                                        type=ORDER_TYPE_LIMIT,
+                                                        timeinforce='GTC',
+                                                        quantity=abs(float(orders[1]["positionAmt"])),
+                                                        price=round(float(orders[1]["entryPrice"]) + (float(orders[1]["entryPrice"]) * float(active[5])), int(token[3]))
+                                                    )
+                                                    break
+                                            break
+
+                elif float(indicadores['EMA100']) > float(pClose):
+                    print("tendencia bajista")
+                    try:
+                        entra = señal['RECOMMENDATION'].index("SELL")
+                        entra = "SELL"
+                    except Exception:
+                        entra = señal['RECOMMENDATION']
+                        lOrden[moneda] = entra
+
+                    if entra == "SELL" and lOrden[moneda] != entra:
+                        cursor.execute("SELECT * FROM public.active WHERE token = '"+moneda+"'")
+                        actives = cursor.fetchall()
+                        
+                        for active in actives:
+                            if active[3] > 0:
+                                cursor.execute("SELECT * FROM public.users WHERE name = '"+active[1]+"'")
+                                user = cursor.fetchall()
+                                client = Client(user[0][2], user[0][3])
+                                
+                                lOrden[moneda] = entra
+                                while True:
+                                    try:
+                                        orders = client.futures_position_information(symbol=moneda[:moneda.index("USDT") + 4].upper())
+                                        break
+                                    except Exception as e:
+                                        print(e)
+                                        time.sleep(10)
+
+                                lOrden[moneda] = entra
+                                # Aquí va el precio mínimo al que debe estar
+                                precioV = float(orders[2]["entryPrice"]) + (float(orders[2]["entryPrice"]) * float(active[4]))
+                                cantidad = round(float(active[3]) / float(orders[0]["markPrice"]), token[2])
+                                
+                                if precioV <= float(orders[2]["markPrice"]) or precioV == 0.0:
+                                    order_short = ""
+                                    order_short = client.futures_create_order(
+                                        symbol=moneda[:moneda.index("USDT") + 4].upper(),
+                                        side='SELL',
+                                        positionSide='SHORT',
+                                        type=ORDER_TYPE_MARKET,
+                                        quantity=cantidad
+                                    )
+                                    print("abri short:")
+                                    print(pClose)
+                                    while True:
+                                        if order_short != "":
+                                            orders = ""
+                                            orders = client.futures_position_information(symbol=moneda[:moneda.index("USDT") + 4].upper())
+
+                                            while True:
+                                                if orders != "":
+                                                    close_short = client.futures_create_order(
+                                                        symbol=moneda[:moneda.index("USDT") + 4].upper(),
+                                                        side='BUY',
+                                                        positionSide='SHORT',
+                                                        type=ORDER_TYPE_LIMIT,
+                                                        timeinforce='GTC',
+                                                        quantity=abs(float(orders[2]["positionAmt"])),
+                                                        price=round(float(orders[2]["entryPrice"]) - (float(orders[2]["entryPrice"]) * float(active[5])), token[3])
+                                                    )
+                                                    break
+                                            break
+        
+            
+            
+            fin = time.time()
+            duracion = fin - inicio
+            espera = round(15-duracion, 0)
+            if espera >=1:
+                time.sleep(espera)
+            
+        
+        
+        
+        #AQUI TERMINA EL CODIGO A EJECUTAR
+        
+    else:
+        print("Estoy Apagado")
+        time.sleep(int(config[0][1]))
