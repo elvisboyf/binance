@@ -13,7 +13,7 @@ def conectar():
         try:
             print("conectando DB")
             conecxion = pg.connect(
-                host="postgres://root:FxoDBQeYSb82YvlJS538k883NlsbZEiW@dpg-cj4dputgkuvsl08la0s0-a/creativedb",
+                host="dpg-cj4dputgkuvsl08la0s0-a",
                 user="root",
                 password = "FxoDBQeYSb82YvlJS538k883NlsbZEiW",
                 database = "creativedb",
