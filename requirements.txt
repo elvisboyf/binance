@@ -1,3 +1,4 @@
 tradingview_ta
 python-binance
 matplotlib
+psycopg2
