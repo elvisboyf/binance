@@ -343,4 +343,3 @@ if public_ip:
         
 else:
     print("no he puede validar tu ip")
-
