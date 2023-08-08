@@ -324,9 +324,7 @@ if public_ip:
         cursor.execute(sql, data)
         conn.commit()
         cursor.close()
-    else:
-        print("La ip que me con la que estoy arrancando no es buena")
-        print(public_ip)
+    elif public_ip != config[0][2] and config[0][3] == "render":
         conn = conectar()
         cursor= conn.cursor()
         json_data = "none"
@@ -336,5 +334,12 @@ if public_ip:
         conn.commit()
         cursor.close()
         time.sleep(int(config[0][1]))
+    else:
+        print("La ip que me con la que estoy arrancando no es buena")
+        print(public_ip)
+        print("Esto esta en un servidor online")
+        print(config[0][3])
+        time.sleep(int(config[0][1]))
+        
 else:
     print("no he puede validar tu ip")
