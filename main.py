@@ -319,7 +319,7 @@ if public_ip:
         conn = conectar()
         cursor= conn.cursor()
         json_data = "render"
-        sql = "UPDATE config SET servidor = %s WHERE id = 1;"
+        sql = "UPDATE config SET servidor = %s;"
         data = (json_data,)
         cursor.execute(sql, data)
         conn.commit()
@@ -330,7 +330,7 @@ if public_ip:
         conn = conectar()
         cursor= conn.cursor()
         json_data = "none"
-        sql = "UPDATE config SET servidor = %s WHERE id = 1;"
+        sql = "UPDATE config SET servidor = %s ;"
         data = (json_data,)
         cursor.execute(sql, data)
         conn.commit()
