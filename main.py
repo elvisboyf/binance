@@ -1,4 +1,4 @@
-import time, json, requests
+import time, json, requests, os
 
 
 def get_public_ip():
@@ -13,3 +13,4 @@ def get_public_ip():
 
 public_ip = get_public_ip()
 print(public_ip)
+print(os.environ.get('SERVIDOR'))
