@@ -1,4 +1,4 @@
-time, json, requests
+import time, json, requests
 
 
 def get_public_ip():
