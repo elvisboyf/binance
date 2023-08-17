@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Aug 16 17:45:05 2023
-
-@author: ElvisBoyf
-"""
-
 from tradingview_ta import *
 import tradingview_ta, time, json, requests
 from binance.client import Client
@@ -79,7 +72,7 @@ if public_ip:
                 #LISTA DE BARIABLES QUE SE DEBEN REINICIAR CADA CICLO
                 analiza = ""
                 
-                if config[0][0] =="on" and len(tokens) != 0:
+                if config[0][0] =="on" and len(tokens) != 0 and "local" == config[0][3]:
                     #AQUI INICIA EL CODIGO A EJECUTAR
                     for token in tokens:
                         inicio = time.time()
@@ -121,7 +114,7 @@ if public_ip:
                         if pOpen != nBela:
                             lBelas[moneda] = pOpen
                             print(moneda + " es: " + señal['RECOMMENDATION'])
-                            if float(indicadores['EMA20']) < float(pClose):
+                            if float(indicadores['SMA20']) < float(pClose):
                                 print("tendencia alcista")
                                 try:
                                     entra = señal['RECOMMENDATION'].index("BUY")
@@ -158,7 +151,7 @@ if public_ip:
                                                 nextEntry[entra+moneda+active[1]]=nextEntry[entra+moneda+active[1]]
                                             except Exception:
                                                 nextEntry[entra+moneda+active[1]]=0
-                                            print(orders[1]["entryPrice"])
+                                            #print(orders[1]["entryPrice"])
                                             if orders[1]["entryPrice"] == "0.0":
                                                 nextEntry[entra+moneda+active[1]]=0
                                             elif float(nextEntry[entra+moneda+active[1]]) == 0 and orders[1]["entryPrice"] != "0.0":
@@ -168,15 +161,15 @@ if public_ip:
                                             print(nextEntry)
                                             # aqui vamos con el precio al que debe estar como mínimo
                                             precioC = float(nextEntry[entra+moneda+active[1]]) - (float(nextEntry[entra+moneda+active[1]]) * float(active[4]))
-                                            cantidad = round(float(active[2]) / float(orders[0]["markPrice"]), int(token[2]))
+                                            cantidad = round(float(active[2]) / float(pClose), int(token[2]))
                                             if precioC == 0.0:
                                                 nextEntry[entra+moneda+active[1]]=0
                                                 
-                                            if precioC >= float(orders[1]["markPrice"]) or precioC == 0.0:
-                                                print("abrir Compra")
-                                                print(pClose)
+                                            if precioC >= float(pClose) or precioC == 0.0:
+                                                print("abrir Compra "+active[1])
+                                                print(moneda + ":> " + str(pClose))
                                                 nextEntry[entra+moneda+active[1]]=pClose
-                                                print(nextEntry)
+                                                #print(nextEntry)
                                                 conn = conectar()
                                                 cursor= conn.cursor()
                                                 json_data = json.dumps(nextEntry)
@@ -211,7 +204,7 @@ if public_ip:
                                                                 break
                                                         break
 
-                            elif float(indicadores['EMA20']) > float(pClose):
+                            elif float(indicadores['SMA20']) > float(pClose):
                                 print("tendencia bajista")
                                 try:
                                     entra = señal['RECOMMENDATION'].index("SELL")
@@ -259,12 +252,12 @@ if public_ip:
                                             lOrden[moneda] = entra
                                             # Aquí va el precio mínimo al que debe estar
                                             precioV = float(nextEntry[entra+moneda+active[1]]) + (float(nextEntry[entra+moneda+active[1]]) * float(active[4]))
-                                            cantidad = round(float(active[3]) / float(orders[0]["markPrice"]), token[2])
+                                            cantidad = round(float(active[3]) / float(pClose), token[2])
                                             
                                                 
-                                            if precioV <= float(orders[2]["markPrice"]) or precioV == 0.0:
-                                                print("abri short:")
-                                                print(pClose)
+                                            if precioV <= float(pClose) or precioV == 0.0:
+                                                print("abrir VENTA "+active[1])
+                                                print(moneda + ":> " + str(pClose))
                                                 nextEntry[entra+moneda+active[1]]=pClose
                                                 print(nextEntry)
                                                 conn = conectar()
@@ -312,7 +305,9 @@ if public_ip:
                             time.sleep(espera)                   
                 else:
                     print("Estoy Apagado")
-                    time.sleep(int(config[0][1]))          
+                    break
+                    time.sleep(int(config[0][1])) 
+                    
             except Exception as e:    
                 print("TENGO ERROR")
                 print(e)
@@ -320,8 +315,6 @@ if public_ip:
                 break
                 
             time.sleep(5)
-    
-    
     elif public_ip == config[0][2] and config[0][3] == "local" or config[0][3] == "none":
         conn = conectar()
         cursor= conn.cursor()
