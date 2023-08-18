@@ -1,5 +1,5 @@
 from tradingview_ta import *
-import tradingview_ta, time, json, requests
+import tradingview_ta, time, json, requests, os
 from binance.client import Client
 from binance.enums import *
 import psycopg2 as pg
